@@ -27,22 +27,26 @@ To build the world's first "Autonomous ESG Operating System" that sits on top of
 - **Multitenancy:** Strict logical separation of tenant data (Schema-based or Database-based isolation) to ensure security and privacy.
 - **Subscription Management:** Tiered access (Starter, Growth, Enterprise) managed via Stripe/similar.
 - **Role-Based Access Control (RBAC):** Granular permissions for different departments (HR vs. Operations).
+- **Existing Framework Integration:** Leverage existing Laravel FilamentPHP admin panels for rapid development of data entry and configuration modules.
 
 ### 5.2. Integration Layer (The "Connector")
 - **ERP Integration:** Two-way sync with major ERPs (SAP, Oracle, NetSuite, Microsoft Dynamics).
   - *Data Points:* Energy consumption, raw material sourcing, logistics emissions (Scope 3), waste management logs.
 - **HRMS Integration:** Sync with HR systems (Workday, BambooHR, ADP).
   - *Data Points:* Diversity & Inclusion (D&I) stats, employee turnover, health & safety incidents, training hours, fair wage analysis.
+- **IoT/Sensor Data:** Ingestion of real-time sensor data (air quality, water usage) as demonstrated in existing "SensorMaintenance" and "SensorReport" modules.
 
 ### 5.3. ESG Modules
 
-#### **Onboarding & Strategy** (New)
+#### **Onboarding & Strategy**
 - **ESG Readiness Assessment:** Self-assessment tool (inspired by MITI i-ESGReady) to benchmark current maturity against industry standards.
 - **Goal Setting:** AI-driven recommendations for setting realistic targets based on sector benchmarks.
 
 #### **E - Environmental**
-- **Carbon Accounting:** Automated calculation of Scope 1, 2, and 3 emissions based on ERP data.
-- **Resource Efficiency:** Water and waste tracking.
+- **Carbon Accounting:** Automated calculation of Scope 1, 2, and 3 emissions.
+  - *Reusable Asset:* `EmissionEntry` model and calculation logic (Scope 1 & 2) from `bintulu-fe-filamentphp`.
+  - *Reusable Asset:* Emission Factors management (`EmissionFactorTableResource`).
+- **Resource Efficiency:** Water and waste tracking (leverage `WaterBillEntryResource`).
 - **Supply Chain Sustainability:** AI scanning of supplier certifications and risks.
 - **Sector Benchmarking:** Estimate annual GHG reduction potentials by subsector.
 
@@ -54,6 +58,7 @@ To build the world's first "Autonomous ESG Operating System" that sits on top of
 #### **G - Governance**
 - **Compliance Tracker:** Auto-mapping internal policies to external regulations (GDPR, EU CSRD, ISSB, and national frameworks like MITI i-ESG).
 - **Audit Trail:** Immutable logs of all data changes and approvals.
+  - *Reusable Asset:* `AuditResource` and `Auditable` trait from existing codebase.
 
 ### 5.4. Agentic AI Capabilities
 This is the core differentiator. The system utilizes autonomous agents (e.g., based on LLMs like GPT-4 or specialized models) to perform tasks:
@@ -76,12 +81,13 @@ This is the core differentiator. The system utilizes autonomous agents (e.g., ba
 |----|----------|-------------|----------|
 | F-01 | Auth | Multi-tenant login (SSO, MFA) | P0 |
 | F-02 | Integration | API adapters for generic ERP/HRMS (REST/GraphQL) | P0 |
-| F-03 | Env | Scope 1 & 2 calculator engine | P0 |
+| F-03 | Env | Scope 1 & 2 calculator engine (reuse `EmissionEntry` logic) | P0 |
 | F-04 | Agent | AI "Chat with Data" interface (Natural Language Query) | P1 |
 | F-05 | Social | D&I Dashboard visualizing HRMS data | P1 |
 | F-06 | Reporting | One-click export (GRI, TCFD, SASB templates) | P1 |
 | F-07 | Governance | Policy management document repository | P2 |
 | F-08 | Assessment | ESG Readiness Self-Assessment Tool | P1 |
+| F-09 | Audit | Activity logs and data change tracking (reuse `AuditResource`) | P0 |
 
 ## 7. Non-Functional Requirements
 - **Security:** SOC 2 Type II compliance, GDPR/CCPA compliance, Data Encryption at rest and in transit.
@@ -90,29 +96,30 @@ This is the core differentiator. The system utilizes autonomous agents (e.g., ba
 - **Latency:** AI query responses < 3 seconds.
 
 ## 8. Technology Stack Recommendation
-- **Frontend:** React.js / Next.js (Server Components for dashboards).
-- **Backend:** Node.js (NestJS) or Python (FastAPI) for AI services.
-- **Database:** PostgreSQL (Relational data), Vector Database (Pinecone/Weaviate for AI RAG).
-- **AI/LLM:** LangChain / AutoGPT framework for agents, OpenAI API or hosted Llama 3 for inference.
-- **Infrastructure:** AWS/GCP/Azure with Terraform for multi-tenant infrastructure provisioning.
+- **Frontend:** FilamentPHP (Laravel) for Admin Panel & Data Entry. React.js / Next.js for Customer Facing Dashboards (optional).
+- **Backend:** Laravel 11 (PHP 8.2+) serving as the core API and Admin backend.
+- **Database:** PostgreSQL / MySQL (Relational data).
+- **AI/LLM:** Python (FastAPI) microservice for AI agents (LangChain / AutoGPT), communicating with Laravel via API.
+- **Infrastructure:** AWS/GCP/Azure with Docker/Kubernetes.
 
 ## 9. Roadmap
 
 ### Phase 1: MVP (Months 1-3)
-- Multi-tenant scaffolding & Auth.
-- Basic ERP Connector (CSV upload + 1 major API).
-- Carbon Calculator (Scope 1 & 2).
-- Basic HR Dashboard.
+- **Refactor & Migrate:** Port existing `bintulu-fe-filamentphp` modules (Emission Entry, Factors, Audits) to new multi-tenant architecture.
+- **Multi-tenant Auth:** Implement tenant isolation.
+- **Basic ERP Connector:** CSV upload + 1 major API.
+- **Carbon Calculator:** Enhance existing Scope 1 & 2 logic.
 - **ESG Readiness Assessment Tool.**
 
 ### Phase 2: The Agentic Layer (Months 4-6)
-- Implementation of "Data Hunter" and "Report Generator" agents.
-- Real-time API integrations with SAP/Workday.
-- Scope 3 Supply Chain estimation.
-- **Support for GRI/SASB export templates.**
+- **AI Service Integration:** Build Python AI microservice and connect to Laravel.
+- **Agents:** Implementation of "Data Hunter" and "Report Generator" agents.
+- **Real-time API:** Integrations with SAP/Workday.
+- **Scope 3:** Supply Chain estimation.
+- **Reporting:** Support for GRI/SASB export templates.
 
 ### Phase 3: Scale & Predict (Months 7+)
-- Predictive AI (forecasting emissions).
-- Regulatory Scout Agent.
-- Marketplace for 3rd party ESG auditors.
-- **MSME Supplier Portal.**
+- **Predictive AI:** Forecasting emissions.
+- **Regulatory Scout Agent:** Automated regulation monitoring.
+- **Marketplace:** For 3rd party ESG auditors.
+- **MSME Supplier Portal:** Simplified view for supply chain data entry.
